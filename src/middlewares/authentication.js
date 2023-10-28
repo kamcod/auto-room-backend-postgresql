@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const {unAuthenticatedError} = require('../errors/index')
 
 const Authentication = (req, res, next) => {
-    const token = req.cookies.token;
+    const token = req.cookies?.token || req.headers.authorization;
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         req.user= {userId: payload.userId};

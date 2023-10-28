@@ -10,8 +10,8 @@ const SignUp = async (req, res, next) => {
     if (!name || !email) {
         next(new badRequestError('Please provide name and email'))
     }
-    pool.query(findUserByEmail, [email], async (err, result) => {
-        if(result){
+    const user = await pool.query(findUserByEmail, [email]);
+        if(user){
             next(new badRequestError("This account already exists"));
         } else {
             let rnum = Math.floor(Math.random() * name.length);
@@ -20,54 +20,46 @@ const SignUp = async (req, res, next) => {
             const randomBytes = await bcrypt.genSalt(10)
             const EncryptedPassword = await bcrypt.hash(randomPassword, randomBytes);
 
-            pool.query(createNewUser, [name, email, EncryptedPassword], async (err, result) =>{
-                if(result){
-                    await sendMail(email, {
-                        subject: 'Account Created',
-                        content: `
+            await pool.query(createNewUser, [name, email, EncryptedPassword]);
+            await sendMail(email, {
+                subject: 'Account Created',
+                content: `
                 <h3>You have successfully created your account on Auto Room</h3>
                 <p>Use following password to login to your account</p>
                 <b>Your password:</b> ${randomPassword}
                 <p>
                  <b>Note:</b> Please do not share this pasword to anyone
                 </p>`
-                    })
-                    res.status(201).send("User is created successfully");
-                }
             })
+            res.status(201).send("User is created successfully");
         }
-    })
 
 }
 
-const SignIn = (req, res, next) => {
+const SignIn = async (req, res, next) => {
     const { email, password } = req.body
     if (!email || !password) {
         next(new badRequestError('Please provide email and password'));
     }
-    pool.query(findUserByEmail, [email], async (err, result) => {
-        if(result && result.rows.length){
-            const { password: encryptedPassword, id, name } = result.rows[0];
-            const isPasswordCorrect = await bcrypt.compare(password, encryptedPassword);
-            if (!isPasswordCorrect) {
-                    return next(new unAuthenticatedError('Invalid Credentials'));
-                }
-            const token = jwt.sign(
-                { userId: id, name },
-                process.env.JWT_SECRET,
-                {
-                    expiresIn: process.env.JWT_LIFETIME,
-                }
-            )
-            res.cookie("token", token, { httpOnly: true, secure: false })
-            res.status(200).json(result.rows[0]);
-        } else {
-            next(new unAuthenticatedError('User Not Found!'));
+    const user = await pool.query(findUserByEmail, [email]);
+    if(user.rows.length){
+        const { password: encryptedPassword, id, name } = result.rows[0];
+        const isPasswordCorrect = await bcrypt.compare(password, encryptedPassword);
+        if (!isPasswordCorrect) {
+            return next(new unAuthenticatedError('Invalid Credentials'));
         }
-        if(err){
-            next(new unAuthenticatedError('User Not Found!'));
-        }
-    })
+        const token = jwt.sign(
+            { userId: id, name },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: process.env.JWT_LIFETIME,
+            }
+        )
+        res.cookie("token", token, { httpOnly: true, secure: false })
+        res.status(200).json({user: result.rows[0], token});
+    } else {
+        next(new unAuthenticatedError('User Not Found!'));
+    }
 
 }
 
@@ -81,7 +73,7 @@ const Test = (req, res) => {
         if(err){
             console.log(err)
         }
-        if(res){
+        if(result){
             res.status(200).json(result.rows)
         }
     })

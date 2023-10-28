@@ -10,9 +10,9 @@ const upload = multer();
 
 
 const registerRoutes = require('./routes/register')
-// const jobsRoutes = require('./routes/jobs')
+const jobsRoutes = require('./routes/jobs')
 // const webHooksRoute = require('./routes/webHooks');
-// const authentication = require('./middlewares/authentication')
+const authentication = require('./middlewares/authentication')
 //
 //
 const errorHandler = require('./middlewares/error-handler')
@@ -32,7 +32,7 @@ app.use(upload.array());
 
 
 app.use('/api', registerRoutes)
-// app.use('/api', authentication, jobsRoutes)
+app.use('/api', authentication, jobsRoutes)
 // app.use('/', webHooksRoute);
 
 
