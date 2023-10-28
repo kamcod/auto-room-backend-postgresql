@@ -1,11 +1,11 @@
 const pool = require("../db/connect");
 const bcrypt = require("bcryptjs");
+const jwt = require('jsonwebtoken');
 const sendMail = require("../utils/sendMail");
 const { badRequestError, unAuthenticatedError } = require("../errors/index");
 const { createNewUser, findUserByEmail } = require("../db/queries")
 
 const SignUp = async (req, res, next) => {
-    console.log('here we are... in body', req.body);
     const {name, email} = req.body;
     if (!name || !email) {
         next(new badRequestError('Please provide name and email'))
@@ -40,6 +40,42 @@ const SignUp = async (req, res, next) => {
 
 }
 
+const SignIn = (req, res, next) => {
+    const { email, password } = req.body
+    if (!email || !password) {
+        next(new badRequestError('Please provide email and password'));
+    }
+    pool.query(findUserByEmail, [email], async (err, result) => {
+        if(result && result.rows.length){
+            const { password: encryptedPassword, id, name } = result.rows[0];
+            const isPasswordCorrect = await bcrypt.compare(password, encryptedPassword);
+            if (!isPasswordCorrect) {
+                    return next(new unAuthenticatedError('Invalid Credentials'));
+                }
+            const token = jwt.sign(
+                { userId: id, name },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: process.env.JWT_LIFETIME,
+                }
+            )
+            res.cookie("token", token, { httpOnly: true, secure: false })
+            res.status(200).json(result.rows[0]);
+        } else {
+            next(new unAuthenticatedError('User Not Found!'));
+        }
+        if(err){
+            next(new unAuthenticatedError('User Not Found!'));
+        }
+    })
+
+}
+
+const Logout = (req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({ logout: "logout successful" })
+}
+
 const Test = (req, res) => {
     pool.query("SELECT * FROM cars", (err, result) => {
         if(err){
@@ -53,5 +89,7 @@ const Test = (req, res) => {
 
 module.exports = {
     SignUp,
+    SignIn,
+    Logout,
     Test
 }
