@@ -39,7 +39,7 @@ const SignUp = async (req, res, next) => {
 const SignIn = async (req, res, next) => {
     const { email, password } = req.body
     if (!email || !password) {
-        next(new badRequestError('Please provide email and password'));
+        return next(new badRequestError('Please provide email and password'));
     }
     const user = await pool.query(findUserByEmail, [email]);
     if(user.rows.length){
