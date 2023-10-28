@@ -10,7 +10,7 @@ const getDashboardStats = async (req, res) => {
 
     const userData = await pool.query(findUserById, [req.user.userId]);
     const { name } = userData.rows[0];
-    const allCars = await pool.query('SELECT COUNT(*) FROM users');
+    const allCars = await pool.query(`SELECT COUNT(*) FROM cars WHERE user_id = ${req.user.userId}`);
     const cars = await pool.query(getPaginatedCarsData, [req.user.userId, limit, offset]);
     const carsCount = allCars.rows[0].count;
     const totalPages = Math.ceil(carsCount/limit);
@@ -36,7 +36,7 @@ const getAllCars = async (req, res) => {
     const carsCount = allCars.rows[0].count;
     const totalPages = Math.ceil(carsCount/limit);
     res.status(200).json({
-        data: cars.rows,
+        cars: cars.rows,
         pagination: {
             perPage: limit,
             currentPage: page,
@@ -51,7 +51,7 @@ const getCar = async (req, res, next) => {
         return next(new badRequestError("No Record Found"))
     }
     res.status(200).json({
-        data: car.rows,
+        car: car.rows[0],
     })
 };
 

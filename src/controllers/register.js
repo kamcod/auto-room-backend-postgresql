@@ -8,11 +8,11 @@ const { createNewUser, findUserByEmail } = require("../db/queries")
 const SignUp = async (req, res, next) => {
     const {name, email} = req.body;
     if (!name || !email) {
-        next(new badRequestError('Please provide name and email'))
+        return next(new badRequestError('Please provide name and email'))
     }
     const user = await pool.query(findUserByEmail, [email]);
-        if(user){
-            next(new badRequestError("This account already exists"));
+        if(user.rows.length){
+            return next(new badRequestError("This account already exists"));
         } else {
             let rnum = Math.floor(Math.random() * name.length);
             let randomPassword = name.substring(rnum,rnum+3) + '@' + email.substring(rnum+1,rnum+4) + rnum + 1000;
@@ -43,7 +43,7 @@ const SignIn = async (req, res, next) => {
     }
     const user = await pool.query(findUserByEmail, [email]);
     if(user.rows.length){
-        const { password: encryptedPassword, id, name } = result.rows[0];
+        const { password: encryptedPassword, id, name } = user.rows[0];
         const isPasswordCorrect = await bcrypt.compare(password, encryptedPassword);
         if (!isPasswordCorrect) {
             return next(new unAuthenticatedError('Invalid Credentials'));
@@ -56,7 +56,7 @@ const SignIn = async (req, res, next) => {
             }
         )
         res.cookie("token", token, { httpOnly: true, secure: false })
-        res.status(200).json({user: result.rows[0], token});
+        res.status(200).json({user: user.rows[0], token});
     } else {
         next(new unAuthenticatedError('User Not Found!'));
     }

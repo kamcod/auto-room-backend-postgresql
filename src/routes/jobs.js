@@ -7,6 +7,6 @@ const { getDashboardStats, getAllCars, addCar, getCar, editCar, deleteCar, creat
 router.route('/dashboard').get(getDashboardStats)
 router.route('/car').get(getAllCars).post(addCar)
 router.route('/car/:id').get(getCar).patch(editCar).delete(deleteCar)
-// router.route('/create-payment-intent').post(createPaymentIntent);
+router.route('/create-payment-intent').post(createPaymentIntent);
 
 module.exports = router
