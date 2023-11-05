@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const app = express();
+const index = express();
 const port =  process.env.PORT || 3000;
 
 const cors = require('cors')
@@ -22,39 +22,39 @@ const authentication = require('./middlewares/authentication')
 const errorHandler = require('./middlewares/error-handler')
 const notFound = require('./middlewares/not-found')
 
-app.use(
+index.use(
     rateLimiter({
         windowMs: 15 * 60 * 1000, // 15 minutes
         max: 100, // limit each IP to 100 requests per windowMs
     })
 );
 
-app.use(express.json())
+index.use(express.json())
 
 // for parsing application/json
-app.use(bodyParser.json());
+index.use(bodyParser.json());
 
 // for parsing application/xwww-
-app.use(bodyParser.urlencoded({ extended: true }));
+index.use(bodyParser.urlencoded({ extended: true }));
 //form-urlencoded
 
 // for parsing multipart/form-data
-app.use(upload.array());
+index.use(upload.array());
 
-app.use(cookieParser());
-app.use(xss())
-app.use(cors({ credentials: true, origin: process.env.frontend_domain }))
-app.use(helmet())
+index.use(cookieParser());
+index.use(xss())
+index.use(cors({ credentials: true, origin: process.env.frontend_domain }))
+index.use(helmet())
 
-app.get('/test', (req, res) => {
+index.get('/test', (req, res) => {
     res.status(200).send("Everything is fine bro")
 })
-app.use('/api', registerRoutes)
-app.use('/api', authentication, jobsRoutes)
-// app.use('/', webHooksRoute);
+index.use('/api', registerRoutes)
+index.use('/api', authentication, jobsRoutes)
+// index.use('/', webHooksRoute);
 
 
-app.use(errorHandler)
-app.use(notFound)
+index.use(errorHandler)
+index.use(notFound)
 
-app.listen(port, () => console.log(`App is listening at http://localhost:${port}`));
+index.listen(port, () => console.log(`App is listening at http://localhost:${port}`));
