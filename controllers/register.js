@@ -69,14 +69,15 @@ const Logout = (req, res) => {
 }
 
 const Test = (req, res) => {
-    pool.query("SELECT * FROM cars", (err, result) => {
-        if(err){
-            console.log(err)
-        }
-        if(result){
-            res.status(200).json(result.rows)
-        }
-    })
+    res.status(200).send('hahah')
+    // pool.query("SELECT * FROM cars", (err, result) => {
+    //     if(err){
+    //         console.log(err)
+    //     }
+    //     if(result){
+    //         res.status(200).json(result.rows)
+    //     }
+    // })
 }
 
 module.exports = {
