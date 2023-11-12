@@ -21,6 +21,7 @@ const authentication = require('./middlewares/authentication')
 
 const errorHandler = require('./middlewares/error-handler')
 const notFound = require('./middlewares/not-found')
+const path = require("path");
 
 app.use(
     rateLimiter({
@@ -46,9 +47,10 @@ app.use(xss())
 app.use(cors({ credentials: true, origin: process.env.frontend_domain }))
 app.use(helmet())
 
-app.use('/', (req, res) => {
-    res.send("Everything is fine bro")
-})
+app.use(express.static(path.join(__dirname, './frontend/build')));
+// app.use('/', (req, res) => {
+//     res.send("Everything is fine bro")
+// })
 app.use('/api', registerRoutes)
 app.use('/api', authentication, jobsRoutes)
 // app.use('/', webHooksRoute);
