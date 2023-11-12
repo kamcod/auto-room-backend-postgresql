@@ -48,6 +48,7 @@ app.use(cors({ credentials: true, origin: process.env.frontend_domain }))
 app.use(helmet())
 
 app.use(express.static(path.join(__dirname, './frontend/build')));
+
 // app.use('/', (req, res) => {
 //     res.send("Everything is fine bro")
 // })
