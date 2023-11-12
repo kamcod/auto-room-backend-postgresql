@@ -46,9 +46,9 @@ app.use(xss())
 app.use(cors({ credentials: true, origin: process.env.frontend_domain }))
 app.use(helmet())
 
-// app.use('/', (req, res) => {
-//     res.send("Everything is fine bro")
-// })
+app.use('/', (req, res) => {
+    res.send("Everything is fine bro")
+})
 app.use('/api', registerRoutes)
 app.use('/api', authentication, jobsRoutes)
 // app.use('/', webHooksRoute);
