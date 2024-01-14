@@ -49,9 +49,9 @@ app.use(helmet())
 
 app.use(express.static(path.join(__dirname, './frontend/build')));
 
-// app.use('/', (req, res) => {
-//     res.send("Everything is fine bro")
-// })
+app.use('/get-test-data', (req, res) => {
+    res.send("Everything is fine bro")
+})
 app.use('/api', registerRoutes)
 app.use('/api', authentication, jobsRoutes)
 // app.use('/', webHooksRoute);
