@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer();
+const testData = require('./utils/data');
 
 
 
@@ -50,7 +51,7 @@ app.use(helmet())
 app.use(express.static(path.join(__dirname, './frontend/build')));
 
 app.use('/get-test-data', (req, res) => {
-    res.send("Everything is fine bro")
+    res.status(200).json(testData);
 })
 app.use('/api', registerRoutes)
 app.use('/api', authentication, jobsRoutes)
